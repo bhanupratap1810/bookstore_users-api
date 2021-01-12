@@ -1,6 +1,7 @@
 package users
 
 import (
+	"github.com/bhanupratap1810/bookstore_users-api/controllers"
 	"github.com/bhanupratap1810/bookstore_users-api/domain/users"
 	"github.com/bhanupratap1810/bookstore_users-api/services"
 	"github.com/bhanupratap1810/bookstore_users-api/utils/errors"
@@ -17,22 +18,32 @@ func getUserId(userIdParam string) (int64, *errors.RestErr) {
 	return userId, nil
 }
 
-func CreateUser(c *gin.Context) {
-	var user users.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body")
-		c.JSON(restErr.Status, restErr)
-		return
-	}
+func CreateUserHandler(service controllers.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var user users.User
+		if err := c.ShouldBindJSON(&user); err != nil {
+			restErr := errors.NewBadRequestError("invalid json body")
+			c.JSON(restErr.Status, restErr)
+			return
+		}
 
-	result, saveErr := services.CreateUser(user)
-	if saveErr != nil {
-		c.JSON(saveErr.Status, saveErr)
-		return
+		var a int64
+		u, err := service.UserServiceImpl.GetUser(a)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "",
+				"error":   err.Error,
+			})
+		}
+
+		//result, saveErr := services.CreateUser(user)
+		//if saveErr != nil {
+		//	c.JSON(saveErr.Status, saveErr)
+		//	return
+		//}
+		c.JSON(http.StatusCreated, u)
 	}
-	c.JSON(http.StatusCreated, result)
 }
-
 
 func GetUser(c *gin.Context) {
 	userId, idErr := getUserId(c.Param("user_id"))
@@ -62,13 +73,13 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	user.Id=userId
+	user.Id = userId
 
-	isPartial:=c.Request.Method==http.MethodPatch
+	isPartial := c.Request.Method == http.MethodPatch
 
-	result, err:= services.UpdateUser(isPartial, user)
-	if err!= nil{
-		c.JSON(err.Status,err)
+	result, err := services.UpdateUser(isPartial, user)
+	if err != nil {
+		c.JSON(err.Status, err)
 		return
 	}
 	c.JSON(http.StatusOK, result)
@@ -84,5 +95,5 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(err.Status, err)
 		return
 	}
-	c.JSON(http.StatusOK, map[string]string{"status":"deleted"})
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
