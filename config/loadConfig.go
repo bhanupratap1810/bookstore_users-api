@@ -17,9 +17,9 @@ func LoadConfig() *Configuration {
 
 
 	return &Configuration{
-		MysqlUsersUsername: os.Getenv(constants.Mysql_users_username),
-		MysqlUsersPassword: os.Getenv(constants.Mysql_users_password),
-		MysqlUsersHost:     os.Getenv(constants.Mysql_users_host),
-		MysqlUsersSchema:   os.Getenv(constants.Mysql_users_schema),
+		MysqlUsersUsername: os.Getenv(constants.MysqlUsersUsername),
+		MysqlUsersPassword: os.Getenv(constants.MysqlUsersPassword),
+		MysqlUsersHost:     os.Getenv(constants.MysqlUsersHost),
+		MysqlUsersSchema:   os.Getenv(constants.MysqlUsersSchema),
 	}
 }

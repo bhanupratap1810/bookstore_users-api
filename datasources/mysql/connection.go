@@ -10,6 +10,10 @@ type DbService struct {
 	Connection string
 }
 
+var(
+	Client *sql.DB
+)
+
 func NewDbService(username, password, host, schema string) (*DbService, error) {
 
 	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8",

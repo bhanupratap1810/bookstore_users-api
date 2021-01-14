@@ -25,7 +25,7 @@ func StartApplication(){
 
 	//Database service
 
-	dbService, err := mysql.NewDbService(appConfig.MysqlUsersUsername, appConfig.MysqlUsersPassword, appConfig.MysqlUsersHost, appConfig.MysqlUsersSchema, )
+	dbService, err := mysql.NewDbService(appConfig.MysqlUsersUsername, appConfig.MysqlUsersPassword, appConfig.MysqlUsersHost, appConfig.MysqlUsersSchema )
 	if err != nil {
 		//handle
 		panic(err)
@@ -33,13 +33,11 @@ func StartApplication(){
 
 	userDaoService := users.NewUserDaoMysqlService(*dbService)
 	userService := services.NewUserServiceImpl(userDaoService)
+	//service := controllers.NewService(userService)
+	//mapUrls(service)
+	mapUrls(controllers.Service{UserServiceImpl: userService})
 
-	service := controllers.NewService(userService)
-
-	mapUrls(service)
-
-
-
-
-	router.Run(":8080")
+	if err := router.Run(":8080"); err!=nil{
+		panic(err)
+	}
 }

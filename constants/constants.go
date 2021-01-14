@@ -2,8 +2,15 @@ package constants
 
 
 const (
-	Mysql_users_username = "mysql_users_username"
-	Mysql_users_password = "mysql_users_password"
-	Mysql_users_host     = "mysql_users_host"
-	Mysql_users_schema   = "mysql_users_schema"
+	MysqlUsersUsername = "mysql_users_username"
+	MysqlUsersPassword = "mysql_users_password"
+	MysqlUsersHost     = "mysql_users_host"
+	MysqlUsersSchema   = "mysql_users_schema"
+)
+
+const (
+	QueryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created) VALUES(?,?,?,?);"
+	QueryGetUser    = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
+	QueryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?"
+	QueryDeleteUser = "DELETE FROM users WHERE id=?;"
 )
