@@ -54,7 +54,7 @@ func GetUserHandler(service controllers.Service) gin.HandlerFunc {
 			c.JSON(getErr.Status, getErr)
 			return
 		}
-		c.JSON(http.StatusCreated, user)
+		c.JSON(http.StatusOK, user)
 	}
 }
 
