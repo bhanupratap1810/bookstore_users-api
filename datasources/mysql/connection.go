@@ -7,12 +7,8 @@ import (
 )
 
 type DbService struct {
-	Connection string
-}
-
-var(
 	Client *sql.DB
-)
+}
 
 func NewDbService(username, password, host, schema string) (*DbService, error) {
 
@@ -21,17 +17,17 @@ func NewDbService(username, password, host, schema string) (*DbService, error) {
 		password,
 		host,
 		schema)
-	Client, err := sql.Open("mysql", dataSourceName)
+	client, err := sql.Open("mysql", dataSourceName)
 	if err != nil {
 		fmt.Println("err connecting to mysql : ", err)
 		return nil, err
 	}
-	if err = Client.Ping(); err != nil {
+	if err = client.Ping(); err != nil {
 		//add print statements
 		return nil, err
 	}
 
-	return &DbService{Connection: "add your client"}, nil
+	return &DbService{Client: client}, nil
 }
 
 //const (

@@ -13,16 +13,23 @@ type UserService interface {
 }
 
 type UserServiceImpl struct {
-	UserDaoService users.UserDaoService
+	userDaoService users.UserDaoService
 }
 
 func NewUserServiceImpl(userDaoService users.UserDaoService) UserService {
-	return &UserServiceImpl{UserDaoService: userDaoService}
+	return &UserServiceImpl{userDaoService: userDaoService}
+	//var impl UserServiceImpl
+	//impl.userDaoService=userDaoService
+	//impl := UserServiceImpl{
+	//	userDaoService: userDaoService,
+	//}
+	//impl:=UserServiceImpl{}
+	//impl.userDaoService=userDaoService
 }
 
 func (u *UserServiceImpl) GetUser(userId int64) (*users.User, *errors.RestErr) {
 	result := &users.User{Id: userId}
-	err := u.UserDaoService.Get(result)
+	err := u.userDaoService.Get(result)
 	if err != nil {
 		//log
 		return nil, err
@@ -35,24 +42,24 @@ func (u *UserServiceImpl) CreateUser(user users.User) (*users.User, *errors.Rest
 		if err := user.Validate(); err != nil {
 			return nil, err
 		}
-		if err := u.UserDaoService.Save(&user); err != nil {
+		if err := u.userDaoService.Save(&user); err != nil {
 			return nil, err
 		}
 		return &user, nil
 }
 
 func (u *UserServiceImpl) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr){
-		//current, err := UserService.GetUser(u, user.Id)
-		//if err != nil {
-		//	return nil, err
-		//}
+		current, err := u.GetUser(user.Id)
+		if err != nil {
+			return nil, err
+		}
 
-	current := &users.User{Id: user.Id}
-	err := u.UserDaoService.Get(current)
-	if err != nil {
-		//log
-		return nil, err
-	}
+	//current := &users.User{Id: user.Id}
+	//err := u.userDaoService.Get(current)
+	//if err != nil {
+	//	//log
+	//	return nil, err
+	//}
 
 		if isPartial {
 			if user.FirstName != "" {
@@ -71,7 +78,7 @@ func (u *UserServiceImpl) UpdateUser(isPartial bool, user users.User) (*users.Us
 
 		}
 
-		if err := u.UserDaoService.Update(&user); err != nil {
+		if err := u.userDaoService.Update(&user); err != nil {
 			return nil, err
 		}
 		return current, nil
@@ -79,7 +86,7 @@ func (u *UserServiceImpl) UpdateUser(isPartial bool, user users.User) (*users.Us
 
 func (u *UserServiceImpl) DeleteUser(userId int64) *errors.RestErr{
 		user := &users.User{Id: userId}
-		return u.UserDaoService.Delete(user)
+		return u.userDaoService.Delete(user)
 }
 
 //func GetUser(userId int64) (*users.User, *errors.RestErr) {

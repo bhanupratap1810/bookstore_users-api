@@ -32,7 +32,7 @@ func NewUserDaoMysqlService(dbService mysql.DbService) UserDaoService {
 }
 
 func (u *userDaoMysql) Get(user *User) *errors.RestErr {
-		stmt, err := mysql.Client.Prepare(constants.QueryGetUser)
+		stmt, err := u.DbService.Client.Prepare(constants.QueryGetUser)
 		if err != nil {
 			return errors.NewInternalServerError(err.Error())
 		}
@@ -46,7 +46,7 @@ func (u *userDaoMysql) Get(user *User) *errors.RestErr {
 }
 
 func (u *userDaoMysql) Save(user *User) *errors.RestErr {
-		stmt, err := mysql.Client.Prepare(constants.QueryInsertUser)
+		stmt, err := u.DbService.Client.Prepare(constants.QueryInsertUser)
 		if err != nil {
 			return errors.NewInternalServerError(err.Error())
 		}
@@ -67,7 +67,7 @@ func (u *userDaoMysql) Save(user *User) *errors.RestErr {
 }
 
 func (u *userDaoMysql) Update(user *User) *errors.RestErr {
-		stmt, err := mysql.Client.Prepare(constants.QueryUpdateUser)
+		stmt, err := u.DbService.Client.Prepare(constants.QueryUpdateUser)
 		if err != nil {
 			return errors.NewInternalServerError(err.Error())
 		}
@@ -81,7 +81,7 @@ func (u *userDaoMysql) Update(user *User) *errors.RestErr {
 }
 
 func (u *userDaoMysql) Delete(user *User) *errors.RestErr {
-		stmt, err := mysql.Client.Prepare(constants.QueryDeleteUser)
+		stmt, err := u.DbService.Client.Prepare(constants.QueryDeleteUser)
 		if err != nil {
 			return errors.NewInternalServerError(err.Error())
 		}

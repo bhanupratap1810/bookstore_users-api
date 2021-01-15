@@ -17,6 +17,7 @@ func getUserId(userIdParam string) (int64, *errors.RestErr) {
 	return userId, nil
 }
 
+
 func CreateUserHandler(service controllers.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user users.User
@@ -28,6 +29,7 @@ func CreateUserHandler(service controllers.Service) gin.HandlerFunc {
 		u, err := service.UserServiceImpl.CreateUser(user)
 		if err != nil {
 			c.JSON(err.Status, err)
+			return
 		}
 
 		//result, saveErr := services.CreateUser(user)
