@@ -8,7 +8,7 @@ import (
 
 type JWTService interface {
 	GenerateToken(userId int64, role string) []byte
-	//ValidateToken(tokenString string) (*jwt.Token, error)
+	ValidateToken(tokenString string) error
 }
 
 type jwtService struct {
@@ -37,6 +37,21 @@ func (j *jwtService) GenerateToken(userId int64, role string) []byte {
 	}
 	token, _ := jwt.Sign(jwt.HS256, j.secretKey, myClaims, jwt.MaxAge(15 * time.Minute))
 	return token
+}
+
+func (j *jwtService) ValidateToken(tokenString string) error {
+	token:=[]byte(tokenString)
+	verifiedToken, err := jwt.Verify(jwt.HS256, j.secretKey, token)
+	if err!=nil {
+		return err
+	}
+
+	var claims map[string]interface{}
+	err = verifiedToken.Claims(&claims)
+	if err!=nil {
+		return err
+	}
+	return nil
 }
 
 // Keep it secret.

@@ -13,6 +13,15 @@ func NewUserService(userServiceImpl services.UserService) Service {
 	return Service{UserServiceImpl: userServiceImpl}
 }
 
-func NewBookService(bookServiceImpl services.BookService) Service {
-	return Service{BookServiceImpl: bookServiceImpl}
+func NewBookService(bookServiceImpl services.BookService, userServiceImpl services.UserService) Service {
+	return Service{BookServiceImpl: bookServiceImpl,
+		UserServiceImpl: userServiceImpl,
+	}
 }
+
+
+
+
+
+
+

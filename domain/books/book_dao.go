@@ -12,7 +12,7 @@ type BookDaoService interface {
 	Save(*Book) *errors.RestErr
 	Update(*Book) *errors.RestErr
 	Delete(*Book) *errors.RestErr
-	FindByUserId(*Book) *errors.RestErr
+	//FindByUserId(*Book) *errors.RestErr
 	FindByBookId(*Book) *errors.RestErr
 }
 
@@ -44,7 +44,7 @@ func (b *bookDaoMysql) Get(*Book) ([]Book, *errors.RestErr){
 	results := make([]Book, 0)
 	for rows.Next() {
 		var book Book
-		if err := rows.Scan(&book.BookId, &book.BookName, &book.BookAuthor, &book.BookType, &book.BorrowerId, &book.Status) ; err != nil {
+		if err := rows.Scan(&book.BookId, &book.BookName, &book.BookAuthor, &book.BookType, &book.Status) ; err != nil {
 			//logger.Error("error when scan user row into user struct", err)
 			return nil, errors.NewInternalServerError(err.Error())
 		}
@@ -63,7 +63,7 @@ func (b *bookDaoMysql) Save(book *Book) *errors.RestErr{
 	}
 	defer stmt.Close()
 
-	insertResult, saveErr := stmt.Exec(book.BookName, book.BookAuthor, book.BookType, book.BorrowerId, book.Status)
+	insertResult, saveErr := stmt.Exec(book.BookName, book.BookAuthor, book.BookType, book.Status)
 	if saveErr != nil {
 		return mysql_utils.ParseError(saveErr)
 	}
@@ -81,7 +81,7 @@ func (b *bookDaoMysql) Update(book *Book) *errors.RestErr{
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(book.BookName, book.BookAuthor, book.BookType, book.BorrowerId, book.Status, book.BookId)
+	_, err = stmt.Exec(book.BookName, book.BookAuthor, book.BookType, book.Status, book.BookId)
 	if err != nil {
 		return mysql_utils.ParseError(err)
 	}
@@ -95,24 +95,24 @@ func (b *bookDaoMysql) Delete(book *Book) *errors.RestErr{
 	defer stmt.Close()
 
 	book.Status="deleted"
-	if _, err = stmt.Exec(book.Status,0,book.BookId); err != nil {
+	if _, err = stmt.Exec(book.Status, book.BookId); err != nil {
 		return mysql_utils.ParseError(err)
 	}
 	return nil
 }
-func (b *bookDaoMysql) FindByUserId(book *Book) *errors.RestErr{
-	stmt, err := b.DbService.Client.Prepare(constants.QueryGetBookByUser)
-	if err != nil {
-		return errors.NewInternalServerError(err.Error())
-	}
-	defer stmt.Close()
-
-	result := stmt.QueryRow(book.BorrowerId)
-	if getErr := result.Scan(&book.BookId, &book.BookName, &book.BookAuthor, &book.BookType); getErr != nil {
-		return mysql_utils.ParseError(getErr)
-	}
-	return nil
-}
+//func (b *bookDaoMysql) FindByUserId(book *Book) *errors.RestErr{
+//	stmt, err := b.DbService.Client.Prepare(constants.QueryGetBookByUser)
+//	if err != nil {
+//		return errors.NewInternalServerError(err.Error())
+//	}
+//	defer stmt.Close()
+//
+//	result := stmt.QueryRow(book.BorrowerId)
+//	if getErr := result.Scan(&book.BookId, &book.BookName, &book.BookAuthor, &book.BookType); getErr != nil {
+//		return mysql_utils.ParseError(getErr)
+//	}
+//	return nil
+//}
 func (b *bookDaoMysql) FindByBookId(book *Book) *errors.RestErr{
 	stmt, err := b.DbService.Client.Prepare(constants.QueryGetBookById)
 	if err != nil {
@@ -121,7 +121,7 @@ func (b *bookDaoMysql) FindByBookId(book *Book) *errors.RestErr{
 	defer stmt.Close()
 
 	result := stmt.QueryRow(book.BookId)
-	if getErr := result.Scan(&book.BookId, &book.BookName, &book.BookAuthor, &book.BookType, &book.BorrowerId, &book.Status); getErr != nil {
+	if getErr := result.Scan(&book.BookId, &book.BookName, &book.BookAuthor, &book.BookType, &book.Status); getErr != nil {
 		return mysql_utils.ParseError(getErr)
 	}
 	return nil

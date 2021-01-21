@@ -11,7 +11,6 @@ type Book struct {
 	BookAuthor  string `json:"book_author"`
 	BookType string `json:"book_type"`
 	Status string `json:"status"`
-	BorrowerId  int64 `json:"borrower_id"`
 }
 
 type Books []Book

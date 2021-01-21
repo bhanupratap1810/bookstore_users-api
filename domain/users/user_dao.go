@@ -75,7 +75,7 @@ func (u *userDaoMysql) Update(user *User) *errors.RestErr {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Password, user.Role, user.Id)
+		_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Password, user.Role, user.State, user.Id)
 		if err != nil {
 			return mysql_utils.ParseError(err)
 		}
@@ -114,7 +114,7 @@ func (u *userDaoMysql) FindByRole(user *User) ([]User, *errors.RestErr) {
 	results := make([]User, 0)
 	for rows.Next() {
 		var user User
-		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.State); err != nil {
+		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Role, &user.State); err != nil {
 			//logger.Error("error when scan user row into user struct", err)
 			return nil, errors.NewInternalServerError(err.Error())
 		}

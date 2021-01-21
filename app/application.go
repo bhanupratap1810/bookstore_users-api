@@ -31,15 +31,17 @@ func StartApplication(){
 		return
 	}
 
+	oAuthService:=services.NewJWTService()
+
 	userDaoService := users.NewUserDaoMysqlService(*dbService)
 	userService := services.NewUserServiceImpl(userDaoService)
 	UserService := controllers.NewUserService(userService)
 	//mapUrls(controllers.Service{UserServiceImpl: userService})
-	mapUsersUrls(UserService)
+	mapUsersUrls(UserService, oAuthService)
 
 	bookDaoService := books.NewBookDaoMysqlService(*dbService)
 	bookService := services.NewBookServiceImpl(bookDaoService)
-	BookService := controllers.NewBookService(bookService)
+	BookService := controllers.NewBookService(bookService,userService)
 	mapBooksUrls(BookService)
 
 	if err := router.Run(":8080"); err!=nil{

@@ -79,8 +79,11 @@ func (u *UserServiceImpl) UpdateUser(isPartial bool, user users.User) (*users.Us
 			if user.Password != "" {
 				current.Password = user.Password
 			}
-			if user.Email != "" {
+			if user.Role != "" {
 				current.Role = user.Role
+			}
+			if user.State != "" {
+				current.State = user.State
 			}
 		} else {
 			current.FirstName = user.FirstName
@@ -88,6 +91,7 @@ func (u *UserServiceImpl) UpdateUser(isPartial bool, user users.User) (*users.Us
 			current.Email = user.Email
 			current.Password = user.Password
 			current.Role = user.Role
+			current.State = user.State
 
 		}
 	//current in place of &user

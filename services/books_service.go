@@ -11,7 +11,7 @@ type BookService interface {
 	UpdateBook(bool, books.Book) (*books.Book, *errors.RestErr)
 	DeleteBook(int64) *errors.RestErr
 	SearchBookById(int64) (*books.Book, *errors.RestErr)
-	SearchBookByUser(int64) (*books.Book, *errors.RestErr)
+	//SearchBookByUser(int64) (*books.Book, *errors.RestErr)
 }
 
 type BookServiceImpl struct {
@@ -51,9 +51,7 @@ func (b *BookServiceImpl) UpdateBook(isPartial bool, book books.Book) (*books.Bo
 		if book.BookType != "" {
 			current.BookType = book.BookType
 		}
-		if book.BorrowerId != 0 {
-			current.BorrowerId = book.BorrowerId
-		}
+
 		if book.Status != "" {
 			current.Status = book.Status
 		}
@@ -61,7 +59,6 @@ func (b *BookServiceImpl) UpdateBook(isPartial bool, book books.Book) (*books.Bo
 		current.BookName = book.BookName
 		current.BookAuthor = book.BookAuthor
 		current.BookType = book.BookType
-		current.BorrowerId = book.BorrowerId
 		current.Status = book.Status
 
 	}
@@ -84,12 +81,12 @@ func (b *BookServiceImpl) SearchBookById(bookId int64) (*books.Book, *errors.Res
 	}
 	return result, nil
 }
-func (b *BookServiceImpl) SearchBookByUser(userId int64) (*books.Book, *errors.RestErr){
-	result := &books.Book{BorrowerId: userId}
-	err := b.bookDaoService.FindByUserId(result)
-	if err != nil {
-		//log
-		return nil, err
-	}
-	return result, nil
-}
+//func (b *BookServiceImpl) SearchBookByUser(userId int64) (*books.Book, *errors.RestErr){
+//	result := &books.Book{BorrowerId: userId}
+//	err := b.bookDaoService.FindByUserId(result)
+//	if err != nil {
+//		//log
+//		return nil, err
+//	}
+//	return result, nil
+//}
