@@ -2,7 +2,10 @@ package services
 
 import (
 	"github.com/bhanupratap1810/bookstore_users-api/domain/users"
+	"github.com/bhanupratap1810/bookstore_users-api/utils/crypto_utils"
 	"github.com/bhanupratap1810/bookstore_users-api/utils/errors"
+	"github.com/kataras/jwt"
+	"time"
 )
 
 type UserService interface {
@@ -10,6 +13,8 @@ type UserService interface {
 	CreateUser(user users.User) (*users.User, *errors.RestErr)
 	UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr)
 	DeleteUser(userId int64) *errors.RestErr
+	SearchUser(string) (users.Users, *errors.RestErr)
+	LoginUser(users.LoginRequest) ([]byte, *errors.RestErr)
 }
 
 type UserServiceImpl struct {
@@ -71,14 +76,22 @@ func (u *UserServiceImpl) UpdateUser(isPartial bool, user users.User) (*users.Us
 			if user.Email != "" {
 				current.Email = user.Email
 			}
+			if user.Password != "" {
+				current.Password = user.Password
+			}
+			if user.Email != "" {
+				current.Role = user.Role
+			}
 		} else {
 			current.FirstName = user.FirstName
 			current.LastName = user.LastName
 			current.Email = user.Email
+			current.Password = user.Password
+			current.Role = user.Role
 
 		}
-
-		if err := u.userDaoService.Update(&user); err != nil {
+	//current in place of &user
+		if err := u.userDaoService.Update(current); err != nil {
 			return nil, err
 		}
 		return current, nil
@@ -87,6 +100,29 @@ func (u *UserServiceImpl) UpdateUser(isPartial bool, user users.User) (*users.Us
 func (u *UserServiceImpl) DeleteUser(userId int64) *errors.RestErr{
 		user := &users.User{Id: userId}
 		return u.userDaoService.Delete(user)
+}
+
+func (u *UserServiceImpl) SearchUser(role string) (users.Users, *errors.RestErr) {
+	user := &users.User{Role:role}
+	return u.userDaoService.FindByRole(user)
+}
+
+func (u *UserServiceImpl) LoginUser(request users.LoginRequest) ([]byte, *errors.RestErr) {
+	var sharedKey = []byte("sercrethatmaycontainch@r$32chars")
+	user := &users.User{
+		Email:    request.Email,
+		Password: crypto_utils.GetMd5(request.Password),
+	}
+	if err := u.userDaoService.FindByEmailAndPassword(user); err != nil {
+		return nil, err
+	}
+	myClaims := map[string]interface{}{
+		"user_id": user.Id,
+		"user_role": user.Role,
+	}
+	token, _ := jwt.Sign(jwt.HS256, sharedKey, myClaims, jwt.MaxAge(15 * time.Minute))
+
+	return token, nil
 }
 
 //func GetUser(userId int64) (*users.User, *errors.RestErr) {

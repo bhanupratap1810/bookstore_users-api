@@ -14,6 +14,8 @@ type UserDaoService interface {
 	Save(*User) *errors.RestErr
 	Update(*User) *errors.RestErr
 	Delete(*User) *errors.RestErr
+	FindByRole(*User) ([]User, *errors.RestErr)
+	FindByEmailAndPassword(*User) *errors.RestErr
 }
 
 type userDaoMysql struct {
@@ -39,7 +41,7 @@ func (u *userDaoMysql) Get(user *User) *errors.RestErr {
 		defer stmt.Close()
 
 		result := stmt.QueryRow(user.Id)
-		if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
+		if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Role, &user.State); getErr != nil {
 			return mysql_utils.ParseError(getErr)
 		}
 		return nil
@@ -54,7 +56,7 @@ func (u *userDaoMysql) Save(user *User) *errors.RestErr {
 
 		user.DateCreated = date_utils.GetNowString()
 
-		insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+		insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Password, user.Role, user.State)
 		if saveErr != nil {
 			return mysql_utils.ParseError(saveErr)
 		}
@@ -73,7 +75,7 @@ func (u *userDaoMysql) Update(user *User) *errors.RestErr {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id)
+		_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Password, user.Role, user.Id)
 		if err != nil {
 			return mysql_utils.ParseError(err)
 		}
@@ -87,10 +89,60 @@ func (u *userDaoMysql) Delete(user *User) *errors.RestErr {
 		}
 		defer stmt.Close()
 
-		if _, err = stmt.Exec(user.Id); err != nil {
+		user.State="inactive"
+		if _, err = stmt.Exec(user.State,user.Id); err != nil {
 			return mysql_utils.ParseError(err)
 		}
 		return nil
+}
+
+func (u *userDaoMysql) FindByRole(user *User) ([]User, *errors.RestErr) {
+	stmt, err := u.DbService.Client.Prepare(constants.QueryFindByRole)
+	if err != nil {
+		//logger.Error("error when trying to prepare find users by status statement", err)
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(user.Role, "active")
+	if err != nil {
+		//logger.Error("error when trying to find users by status", err)
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer rows.Close()
+
+	results := make([]User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.State); err != nil {
+			//logger.Error("error when scan user row into user struct", err)
+			return nil, errors.NewInternalServerError(err.Error())
+		}
+		results = append(results, user)
+	}
+	if len(results) == 0 {
+		return nil, errors.NewNotFoundError("no users matching role")
+	}
+	return results, nil
+}
+
+func (u *userDaoMysql) FindByEmailAndPassword(user *User) *errors.RestErr {
+	stmt, err := u.DbService.Client.Prepare(constants.QueryFindByEmailAndPassword)
+	if err != nil {
+		//logger.Error("error when trying to prepare get user by email and password statement", err)
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	result := stmt.QueryRow(user.Email, user.Password, "active")
+	if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Role, &user.State); getErr != nil {
+		//if strings.Contains(getErr.Error(), mysql_utils.ErrorNoRows) {
+		//	return rest_errors.NewNotFoundError("invalid user credentials")
+		//}
+		//logger.Error("error when trying to get user by email and password", getErr)
+		return errors.NewInternalServerError(getErr.Error())
+	}
+	return nil
 }
 
 func (u *UserDaoMongo) Get(*User) *errors.RestErr {

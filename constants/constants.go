@@ -9,8 +9,19 @@ const (
 )
 
 const (
-	QueryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created) VALUES(?,?,?,?);"
-	QueryGetUser    = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
-	QueryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?"
-	QueryDeleteUser = "DELETE FROM users WHERE id=?;"
+	QueryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created, password, role, state) VALUES(?,?,?,?,?,?,?);"
+	QueryGetUser    = "SELECT id, first_name, last_name, email, date_created, role, state FROM users WHERE id=?;"
+	QueryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=?, password=?, role=? WHERE id=?;"
+	QueryDeleteUser = "UPDATE users SET state=? WHERE id=?;"
+	QueryFindByRole = "SELECT id, first_name, last_name, email, date_created, state FROM users WHERE role=? AND state=?;"
+	QueryFindByEmailAndPassword="SELECT id, first_name, last_name, email, date_created,role, state FROM users WHERE email=? AND password=? AND state=?"
+)
+
+const (
+	QueryInsertBook = "INSERT INTO books(book_name, book_author, book_type, borrower_id, status) VALUES(?,?,?,?,?);"
+	QueryGetBookById    = "SELECT book_id, book_name, book_author, book_type, borrower_id, status FROM books WHERE book_id=?;"
+	QueryGetBookByUser = "SELECT book_id, book_name, book_author, book_type FROM books WHERE borrower_id=?;"
+	QueryUpdateBook = "UPDATE books SET book_name=?, book_author=?, book_type=?, borrower_id=?, status=? WHERE book_id=?;"
+	QueryDeleteBook = "UPDATE books SET status=?, borrower_id=? WHERE book_id=?;"
+	QueryGetBook = "SELECT book_id, book_name, book_author, book_type, borrower_id,  status FROM books;"
 )

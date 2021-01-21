@@ -54,7 +54,7 @@ func GetUserHandler(service controllers.Service) gin.HandlerFunc {
 			c.JSON(getErr.Status, getErr)
 			return
 		}
-		c.JSON(http.StatusOK, user)
+		c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
 	}
 }
 
@@ -97,5 +97,35 @@ func DeleteUserHandler(service controllers.Service) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
+	}
+}
+
+func SearchUserHandler(service controllers.Service) gin.HandlerFunc {
+	return func(c * gin.Context) {
+		role := c.Query("Role")
+
+		Users, err := service.UserServiceImpl.SearchUser(role)
+		if err != nil {
+			c.JSON(err.Status, err)
+			return
+		}
+		c.JSON(http.StatusOK, Users.Marshall(c.GetHeader("X-Public") == "true"))
+	}
+}
+
+func LoginUserHandler(service controllers.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request users.LoginRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
+			restErr := errors.NewBadRequestError("invalid json body")
+			c.JSON(restErr.Status, restErr)
+			return
+		}
+		token, err := service.UserServiceImpl.LoginUser(request)
+		if err != nil {
+			c.JSON(err.Status, err)
+			return
+		}
+		c.JSON(http.StatusOK, token)
 	}
 }

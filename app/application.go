@@ -4,6 +4,7 @@ import (
 	"github.com/bhanupratap1810/bookstore_users-api/config"
 	"github.com/bhanupratap1810/bookstore_users-api/controllers"
 	"github.com/bhanupratap1810/bookstore_users-api/datasources/mysql"
+	"github.com/bhanupratap1810/bookstore_users-api/domain/books"
 	"github.com/bhanupratap1810/bookstore_users-api/domain/users"
 	"github.com/bhanupratap1810/bookstore_users-api/services"
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,6 @@ var(
 )
 
 func StartApplication(){
-
-
 
 	//load config
 
@@ -34,9 +33,14 @@ func StartApplication(){
 
 	userDaoService := users.NewUserDaoMysqlService(*dbService)
 	userService := services.NewUserServiceImpl(userDaoService)
-	service := controllers.NewService(userService)
-	mapUrls(service)
+	UserService := controllers.NewUserService(userService)
 	//mapUrls(controllers.Service{UserServiceImpl: userService})
+	mapUsersUrls(UserService)
+
+	bookDaoService := books.NewBookDaoMysqlService(*dbService)
+	bookService := services.NewBookServiceImpl(bookDaoService)
+	BookService := controllers.NewBookService(bookService)
+	mapBooksUrls(BookService)
 
 	if err := router.Run(":8080"); err!=nil{
 		panic(err)
