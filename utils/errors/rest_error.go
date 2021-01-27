@@ -2,32 +2,48 @@ package errors
 
 import "net/http"
 
-type RestErr struct{
+type RestErr struct {
 	Message string `json:"message"`
-	Status int `json:"status"`
-	Error string `json:"error"`
+	Status  int    `json:"status"`
+	Error   string `json:"error"`
 }
 
 func NewBadRequestError(message string) *RestErr {
 	return &RestErr{
-		Message:message,
-		Status: http.StatusBadRequest,
-		Error: "bad_request",
+		Message: message,
+		Status:  http.StatusBadRequest,
+		Error:   "bad_request",
 	}
 }
 
 func NewNotFoundError(message string) *RestErr {
 	return &RestErr{
-		Message:message,
-		Status: http.StatusNotFound,
-		Error: "not_found",
+		Message: message,
+		Status:  http.StatusNotFound,
+		Error:   "not_found",
 	}
 }
 
 func NewInternalServerError(message string) *RestErr {
 	return &RestErr{
-		Message:message,
-		Status: http.StatusInternalServerError,
-		Error: "internal_server_error",
+		Message: message,
+		Status:  http.StatusInternalServerError,
+		Error:   "internal_server_error",
+	}
+}
+
+func NewForbiddenError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusForbidden,
+		Error:   "forbidden",
+	}
+}
+
+func NewUnauthorizedError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusUnauthorized,
+		Error:   "unauthorized",
 	}
 }

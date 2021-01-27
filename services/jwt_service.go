@@ -1,6 +1,9 @@
 package services
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/bhanupratap1810/bookstore_users-api/constants"
 	"github.com/kataras/jwt"
 	"os"
 	"time"
@@ -8,11 +11,17 @@ import (
 
 type JWTService interface {
 	GenerateToken(userId int64, role string) []byte
-	ValidateToken(tokenString string) error
+	ValidateToken(tokenString string) (*LoginJwtClaims, error)
 }
 
 type jwtService struct {
 	secretKey []byte
+}
+
+type LoginJwtClaims struct {
+	UserId int64  `json:"user_id"`
+	Role   string `json:"role"`
+	jwt.Claims
 }
 
 func NewJWTService() JWTService {
@@ -22,36 +31,54 @@ func NewJWTService() JWTService {
 }
 
 func getSecretKey() []byte {
-	secret := os.Getenv("JWT_SECRET")
+	secret := os.Getenv(constants.JwtSecret)
 	if secret == "" {
-		secret = "secret"
+		secret = constants.DefaultJwtSecret
 	}
-	sec:=[]byte(secret)
+	sec := []byte(secret)
 	return sec
 }
 
 func (j *jwtService) GenerateToken(userId int64, role string) []byte {
-	myClaims := map[string]interface{}{
-		"user_id": userId,
-		"user_role": role,
+	loginJwtClaims := LoginJwtClaims{
+		UserId: userId,
+		Role:   role,
+		Claims: jwt.Claims{
+			Expiry: int64(15 * time.Minute),
+			Issuer: "Library Service",
+		},
 	}
-	token, _ := jwt.Sign(jwt.HS256, j.secretKey, myClaims, jwt.MaxAge(15 * time.Minute))
+	token, err := jwt.Sign(jwt.HS256, j.secretKey, loginJwtClaims)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 	return token
 }
 
-func (j *jwtService) ValidateToken(tokenString string) error {
-	token:=[]byte(tokenString)
+//todo return of below func
+func (j *jwtService) ValidateToken(tokenString string) (*LoginJwtClaims, error) {
+	token := []byte(tokenString)
 	verifiedToken, err := jwt.Verify(jwt.HS256, j.secretKey, token)
-	if err!=nil {
-		return err
+	if err != nil {
+		return nil, err
 	}
 
 	var claims map[string]interface{}
 	err = verifiedToken.Claims(&claims)
-	if err!=nil {
-		return err
+	//todo learn how to use this
+	//expiry := verifiedToken.StandardClaims.Expiry
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	jwtClaims := &LoginJwtClaims{}
+	if val, ok := claims[constants.UserIdKey]; ok {
+		jwtClaims.UserId, _ = val.(json.Number).Int64()
+	}
+	if val, ok := claims[constants.RoleKey]; ok {
+		jwtClaims.Role = val.(string)
+	}
+	return jwtClaims, nil
 }
 
 // Keep it secret.
@@ -137,7 +164,6 @@ func (j *jwtService) ValidateToken(tokenString string) error {
 //	})
 //}
 
-
 //func NewLoginController(loginService service.LoginService,
 //	jWtService service.JWTService) LoginController {
 //	return &loginController{
@@ -150,4 +176,3 @@ func (j *jwtService) ValidateToken(tokenString string) error {
 //	loginService service.LoginService
 //	jWtService   service.JWTService
 //}
-

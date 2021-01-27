@@ -22,11 +22,11 @@ func NewBookServiceImpl(bookDaoService books.BookDaoService) BookService {
 	return &BookServiceImpl{bookDaoService: bookDaoService}
 }
 
-func (b *BookServiceImpl) GetBooks() (books.Books, *errors.RestErr){
+func (b *BookServiceImpl) GetBooks() (books.Books, *errors.RestErr) {
 	return b.bookDaoService.Get(&books.Book{})
 }
 
-func (b *BookServiceImpl) CreateBook(book books.Book) (*books.Book, *errors.RestErr){
+func (b *BookServiceImpl) CreateBook(book books.Book) (*books.Book, *errors.RestErr) {
 	if err := book.Validate(); err != nil {
 		return nil, err
 	}
@@ -81,6 +81,7 @@ func (b *BookServiceImpl) SearchBookById(bookId int64) (*books.Book, *errors.Res
 	}
 	return result, nil
 }
+
 //func (b *BookServiceImpl) SearchBookByUser(userId int64) (*books.Book, *errors.RestErr){
 //	result := &books.Book{BorrowerId: userId}
 //	err := b.bookDaoService.FindByUserId(result)

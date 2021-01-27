@@ -75,7 +75,7 @@ func (u *userDaoMysql) Update(user *User) *errors.RestErr {
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Password, user.Role, user.State, user.Id)
+		_, err = stmt.Exec(user.FirstName, user.LastName, user.Role, user.State, user.Id)
 		if err != nil {
 			return mysql_utils.ParseError(err)
 		}
@@ -90,7 +90,8 @@ func (u *userDaoMysql) Delete(user *User) *errors.RestErr {
 		defer stmt.Close()
 
 		user.State="inactive"
-		if _, err = stmt.Exec(user.State,user.Id); err != nil {
+		user.Role="unemployed"
+		if _, err = stmt.Exec(user.State,user.Role,user.Id); err != nil {
 			return mysql_utils.ParseError(err)
 		}
 		return nil

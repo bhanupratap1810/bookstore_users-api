@@ -19,7 +19,7 @@ type bookIssueDaoMysql struct {
 	DbService mysql.DbService
 }
 
-func NewBookDaoMysqlService(dbService mysql.DbService) BookIssueDaoService {
+func NewBookIssueDaoMysqlService(dbService mysql.DbService) BookIssueDaoService {
 	return &bookIssueDaoMysql{
 		DbService: dbService,
 	}
@@ -45,17 +45,72 @@ func (bi *bookIssueDaoMysql) Save(bookIssue *BookIssue) *errors.RestErr {
 }
 
 func (bi *bookIssueDaoMysql) GetAll(*BookIssue) ([]BookIssue, *errors.RestErr) {
-	return nil, nil
+	stmt, err := bi.DbService.Client.Prepare(constants.QueryGetAll)
+	if err != nil {
+		//logger.Error("error when trying to prepare find users by status statement", err)
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		//logger.Error("error when trying to find users by status", err)
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer rows.Close()
+
+	results := make([]BookIssue, 0)
+	for rows.Next() {
+		var bookIssue BookIssue
+		if err := rows.Scan(&bookIssue.IssueId, &bookIssue.BookId, &bookIssue.UserId) ; err != nil {
+			//logger.Error("error when scan user row into user struct", err)
+			return nil, errors.NewInternalServerError(err.Error())
+		}
+		results = append(results, bookIssue)
+	}
+	if len(results) == 0 {
+		return nil, errors.NewNotFoundError("no users matching role")
+	}
+	return results, nil
 }
 
-func (bi *bookIssueDaoMysql) GetByBookId(*BookIssue) *errors.RestErr {
+func (bi *bookIssueDaoMysql) GetByBookId(bookIssue *BookIssue) *errors.RestErr {
+	stmt, err := bi.DbService.Client.Prepare(constants.QueryGetIssueByBookId)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	result := stmt.QueryRow(bookIssue.BookId)
+	if getErr := result.Scan(&bookIssue.IssueId, &bookIssue.BookId, &bookIssue.UserId); getErr != nil {
+		return mysql_utils.ParseError(getErr)
+	}
 	return nil
 }
 
-func (bi *bookIssueDaoMysql) GetByUserId(*BookIssue) *errors.RestErr {
-	return nil
+func (bi *bookIssueDaoMysql) GetByUserId(bookIssue *BookIssue) *errors.RestErr {
+		stmt, err := bi.DbService.Client.Prepare(constants.QueryGetIssueByUserId)
+		if err != nil {
+			return errors.NewInternalServerError(err.Error())
+		}
+		defer stmt.Close()
+
+		result := stmt.QueryRow(bookIssue.UserId)
+		if getErr := result.Scan(&bookIssue.IssueId, &bookIssue.BookId, &bookIssue.UserId); getErr != nil {
+			return mysql_utils.ParseError(getErr)
+		}
+		return nil
 }
 
-func (bi *bookIssueDaoMysql) Delete(*BookIssue) *errors.RestErr {
-	return nil
+func (bi *bookIssueDaoMysql) Delete(bookIssue *BookIssue) *errors.RestErr {
+		stmt, err := bi.DbService.Client.Prepare(constants.QueryDeleteIssue)
+		if err != nil {
+			return errors.NewInternalServerError(err.Error())
+		}
+		defer stmt.Close()
+
+		if _, err = stmt.Exec(bookIssue.UserId); err != nil {
+			return mysql_utils.ParseError(err)
+		}
+		return nil
 }

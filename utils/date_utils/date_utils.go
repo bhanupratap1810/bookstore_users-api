@@ -2,8 +2,8 @@ package date_utils
 
 import "time"
 
-const(
-	apiDateLayout="2006-01--02T15:05:05Z"
+const (
+	apiDateLayout = "2006-01--02T15:05:05Z"
 )
 
 func GetNow() time.Time {

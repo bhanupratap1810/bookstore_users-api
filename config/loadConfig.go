@@ -15,7 +15,6 @@ type Configuration struct {
 //pick from json file
 func LoadConfig() *Configuration {
 
-
 	return &Configuration{
 		MysqlUsersUsername: os.Getenv(constants.MysqlUsersUsername),
 		MysqlUsersPassword: os.Getenv(constants.MysqlUsersPassword),
